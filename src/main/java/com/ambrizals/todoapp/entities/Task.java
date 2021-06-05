@@ -8,15 +8,6 @@ import javax.persistence.Table;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-@Data
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table
@@ -31,15 +22,17 @@ public class Task {
   @Column(nullable = false)
   private String description;
 
-  public void Create(String title, String description, Boolean isFinish) {
+
+  @Column
+  private Boolean isFinish;
+  
+  public Task(String title, String description, Boolean isFinish) {
     this.title = title;
     this.description = description;
     this.isFinish = isFinish;
   }
 
-  @Column
-  private Boolean isFinish;
-  
+
   public long getId() {
     return this.id;
   }
