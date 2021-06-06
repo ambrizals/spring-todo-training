@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,10 +29,20 @@ public class TodoController {
     return ResponseEntity.ok(tasks);
   }
 
+  @PostMapping(value = "")
+  public ResponseEntity<Task> storeTask(@RequestBody Task request) {
+    Task task = repository.save(request);
+    return ResponseEntity.ok(task);
+  }
+
   @GetMapping(value = "{id}")
   public ResponseEntity<Task> detailTask(@PathVariable("id") long id) {
     Optional<Task> task = repository.findById(id);
-    return ResponseEntity.ok(task.get());
+    if(task.isPresent()) {
+      return ResponseEntity.ok(task.get());
+    } else {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @PutMapping(value = "{id}/finish")

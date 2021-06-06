@@ -6,6 +6,9 @@ import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -26,10 +29,13 @@ public class Task {
   @Column
   private Boolean isFinish;
   
-  public Task(String title, String description, Boolean isFinish) {
-    this.title = title;
-    this.description = description;
-    this.isFinish = isFinish;
+  public static Task create(long id, String title, String description, Boolean isFinish) {
+    Task task = new Task();
+    task.id = id;
+    task.title = title;
+    task.description = description;
+    task.isFinish = isFinish;
+    return task;
   }
 
 
@@ -67,6 +73,11 @@ public class Task {
 
   public void setIsFinish(Boolean isFinish) {
     this.isFinish = isFinish;
+  }
+
+  public String toJSON() throws JsonProcessingException {
+    ObjectMapper mapper = new ObjectMapper();
+    return mapper.writeValueAsString(this);
   }
 
 }
