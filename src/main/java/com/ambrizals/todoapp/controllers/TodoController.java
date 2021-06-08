@@ -7,6 +7,7 @@ import com.ambrizals.todoapp.entities.Task;
 import com.ambrizals.todoapp.repositories.TaskRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,43 +19,44 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/v1/tasks")
-public class TodoController {
+public class TodoController extends MainController {
     
   @Autowired
   private TaskRepository repository;
-
+  
   @GetMapping(value = "")
-  public ResponseEntity<List<Task>> getTask() {
+  public ResponseEntity<Object> getTask() {
     List<Task> tasks = repository.findAll();
-    return ResponseEntity.ok(tasks);
+    return this.objectResponse(HttpStatus.OK, tasks);
   }
 
   @PostMapping(value = "")
-  public ResponseEntity<Task> storeTask(@RequestBody Task request) {
-    Task task = repository.save(request);
-    return ResponseEntity.ok(task);
+  public ResponseEntity<Object> storeTask(@RequestBody Task request) {
+	  this.sendRequestBody(request);
+	  repository.save(request);
+	  return this.messageResponse(HttpStatus.ACCEPTED, "Berhasil Ditambah !");
   }
 
   @GetMapping(value = "{id}")
-  public ResponseEntity<Task> detailTask(@PathVariable("id") long id) {
+  public ResponseEntity<Object> detailTask(@PathVariable("id") long id) {
     Optional<Task> task = repository.findById(id);
     if(task.isPresent()) {
-      return ResponseEntity.ok(task.get());
+    	return this.objectResponse(HttpStatus.OK, task.get());
     } else {
-      return ResponseEntity.notFound().build();
+    	return this.messageResponse(HttpStatus.NOT_FOUND, "Data tidak ditemukan !");
     }
   }
 
   @PutMapping(value = "{id}/finish")
-  public ResponseEntity<String> updateTask(@PathVariable("id") long id)  {
+  public ResponseEntity<Object> updateTask(@PathVariable("id") long id)  {
     Optional<Task> task = repository.findById(id);
     if(task.isPresent()) {
       Task current = task.get();
       current.setIsFinish(true);
       repository.save(current);
-      return ResponseEntity.ok("Sudah di update");
+      return this.messageResponse(HttpStatus.OK, "Data sudah di update !");
     } else {
-      return ResponseEntity.notFound().build();
+    	return this.messageResponse(HttpStatus.NOT_FOUND, "Data tidak ditemukan !");
     }
   }
 }

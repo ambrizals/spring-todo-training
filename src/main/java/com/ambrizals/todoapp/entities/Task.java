@@ -3,7 +3,10 @@ package com.ambrizals.todoapp.entities;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -17,6 +20,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class Task {
   
   @Id
+  @GeneratedValue(strategy=GenerationType.IDENTITY)
   private long id;
 
   @Column(nullable = false)
@@ -38,6 +42,18 @@ public class Task {
     return task;
   }
 
+  /**
+   * preInsert()
+   * 
+   * Is executed before insert data to DBMS, this can be used to set default value on this entity
+   */
+  @PrePersist
+  void preInsert() {
+	  if(this.isFinish == null) {
+		  this.isFinish = false;
+	  }
+  }
+  
 
   public long getId() {
     return this.id;
