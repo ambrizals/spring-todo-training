@@ -8,12 +8,28 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.ambrizals.todoapp.utils.HashUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table
 public class User {
+
+	public static User fromJson(String json) {
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			User user = mapper.readValue(json, User.class);
+			return user;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
@@ -21,6 +37,7 @@ public class User {
 	@Column(nullable = false)
 	private String username;
 	
+	@JsonIgnore
 	@Column(nullable = false)
 	private String password;
 	
@@ -48,7 +65,7 @@ public class User {
 	}
 
 	public void setPassword(String password) {
-		this.password = password;
+		this.password = HashUtils.generateHash(password);
 	}
 
 	public String getFullname() {

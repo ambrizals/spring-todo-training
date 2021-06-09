@@ -5,7 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.ambrizals.todoapp.entities.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -18,6 +20,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
  * @author koushikkothagal
  *
  */
+@Service
 public class JwtUtils {
 	private String SECRET_KEY = "Siap Bos";
 	
@@ -50,10 +53,15 @@ public class JwtUtils {
 		final Claims claims = extractAllClaims(token);
 		return claimsResolver.apply(claims);
 	}
-	
-	public String extractUsername(String token) {
-		return extractClaim(token, Claims::getSubject);
+
+	public User extractUser(String json) {
+		User user = User.fromJson(json);
+		return user;
 	}
+	
+	// public String extractUsername(String token) {
+	// 	return extractClaim(token, Claims::getSubject);
+	// }
 	
 	public Date extractExpiration(String token) {
 		return extractClaim(token, Claims::getExpiration);
@@ -68,9 +76,8 @@ public class JwtUtils {
 		return createToken(claims, userDetails.getUsername());
 	}
 	
-	public Boolean validateToken(String token, UserDetails userDetails) {
-		final String username = extractUsername(token);
-		if(username.equals(userDetails.getUsername()) && !isTokenExpired(token)) {
+	public Boolean validateToken(String token) {
+		if(!isTokenExpired(token)) {
 			return true;
 		} else {
 			return false;
