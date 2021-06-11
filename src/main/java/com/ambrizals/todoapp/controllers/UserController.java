@@ -9,6 +9,7 @@ import com.ambrizals.todoapp.DTO.auth.CreateTokenAuthDTO;
 import com.ambrizals.todoapp.entities.User;
 import com.ambrizals.todoapp.repositories.UserRepository;
 import com.ambrizals.todoapp.utils.HashUtils;
+import com.ambrizals.todoapp.utils.JwtUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,9 +24,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class UserController extends MainController {
 
   @Autowired
+  JwtUtils jwtUtils;
+
+  @Autowired
   UserRepository repository;
   
-  @Secured({"ROLE_ANONYMOUS"})
+  @Secured({"ROLE_USER"})
   @PostMapping(value="")
   public ResponseEntity<Object> createData(@RequestBody User request) {
       User user = new User();
@@ -45,8 +49,13 @@ public class UserController extends MainController {
     User user = repository.findByUsername(request.getUsername());
 
     if (HashUtils.verifyHash(request.getPassword(), user.getPassword())) {
+
+      String token = jwtUtils.generateToken(user);
+
       this.sendRequestBody(request);
-      return this.fullResponse("Berhasil", HttpStatus.ACCEPTED, user);
+      return this.fullResponse("Login Berhasil !", HttpStatus.ACCEPTED, token);
+
+
     } else {
       this.sendRequestBody(request);
       return this.messageResponse(HttpStatus.UNPROCESSABLE_ENTITY, "Password Salah");

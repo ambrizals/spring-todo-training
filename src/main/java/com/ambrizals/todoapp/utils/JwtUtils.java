@@ -6,12 +6,16 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.ambrizals.todoapp.entities.User;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
 
 /**
  * JWT Utility
@@ -22,6 +26,15 @@ import io.jsonwebtoken.SignatureAlgorithm;
  */
 @Service
 public class JwtUtils {
+	
+	@ExceptionHandler(SignatureException.class)
+	public ResponseEntity<Object> invalidToken(SignatureException e) {
+		Map<String, String> errors = new HashMap<>();
+		errors.put("status", HttpStatus.UNAUTHORIZED.getReasonPhrase());
+		errors.put("message", e.getMessage());
+		return new ResponseEntity<>(errors, HttpStatus.UNAUTHORIZED);
+	}	
+
 	private String SECRET_KEY = "Siap Bos";
 	
 	
@@ -54,15 +67,11 @@ public class JwtUtils {
 		return claimsResolver.apply(claims);
 	}
 
-	public User extractUser(String json) {
-		User user = User.fromJson(json);
-		return user;
+	public String extractUser(String token) {
+		String username = extractClaim(token, Claims::getSubject);
+		return username;
 	}
-	
-	// public String extractUsername(String token) {
-	// 	return extractClaim(token, Claims::getSubject);
-	// }
-	
+		
 	public Date extractExpiration(String token) {
 		return extractClaim(token, Claims::getExpiration);
 	}
@@ -71,13 +80,17 @@ public class JwtUtils {
 		return extractExpiration(token).before(new Date());
 	}
 	
-	public String generateToken(UserDetails userDetails) {
+	public String generateToken(User user) {
 		Map<String, Object> claims = new HashMap<String, Object>();
-		return createToken(claims, userDetails.getUsername());
+		claims.put("username", user.getUsername());
+		claims.put("fullname", user.getFullname());
+
+		return createToken(claims, user.getUsername());
 	}
 	
 	public Boolean validateToken(String token) {
-		if(!isTokenExpired(token)) {
+		Claims claims = extractAllClaims(token);
+		if(claims != null) {
 			return true;
 		} else {
 			return false;

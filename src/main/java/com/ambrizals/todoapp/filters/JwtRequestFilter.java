@@ -9,7 +9,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.ambrizals.todoapp.entities.User;
 import com.ambrizals.todoapp.utils.JwtUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         
     final String authorizationHeader = request.getHeader("Authorization");
     
-    User user = null;
+    String user = null;
     String jwt = null;
 
     if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {

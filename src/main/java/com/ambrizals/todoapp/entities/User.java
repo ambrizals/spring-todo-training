@@ -11,7 +11,6 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import com.ambrizals.todoapp.utils.HashUtils;
-// import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -36,6 +35,21 @@ public class User {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public String toJson() {
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			return mapper.writeValueAsString(this);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public User safeOutput() {
+		this.password = "SECRET";
+		return this;
 	}
 
 	@Id
