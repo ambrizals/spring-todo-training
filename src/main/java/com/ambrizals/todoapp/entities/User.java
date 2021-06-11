@@ -6,10 +6,12 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import com.ambrizals.todoapp.utils.HashUtils;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+// import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -18,6 +20,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 @Table
 public class User {
+
+	@PrePersist
+	@PreUpdate
+	void generatePassword() {
+		this.password = HashUtils.generateHash(this.password);
+	}
 
 	public static User fromJson(String json) {
 		ObjectMapper mapper = new ObjectMapper();
@@ -37,7 +45,7 @@ public class User {
 	@Column(nullable = false)
 	private String username;
 	
-	@JsonIgnore
+	// @JsonIgnore
 	@Column(nullable = false)
 	private String password;
 	
@@ -65,7 +73,7 @@ public class User {
 	}
 
 	public void setPassword(String password) {
-		this.password = HashUtils.generateHash(password);
+		this.password = password;
 	}
 
 	public String getFullname() {

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("v1/auth")
 public class AuthController extends MainController {
 	
-  @Secured("ROLE_USER")
+  @Secured({"ROLE_USER"})
 	@GetMapping(value = "")
 	public ResponseEntity<Object> checkAuth() {
 		return this.fullResponse("Berhasil", HttpStatus.OK, "Siap");

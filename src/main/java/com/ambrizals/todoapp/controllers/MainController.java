@@ -26,7 +26,7 @@ public class MainController {
 	 * @param String message
 	 * @return
 	 */
-	public HashMap<String, Object> responseBuilder(HttpStatus httpStatus, Object responseObj, String message) {
+	private HashMap<String, Object> responseBuilder(HttpStatus httpStatus, Object responseObj, String message) {
 		HashMap<String, Object> map = new HashMap<>();
 		map.put("status", httpStatus.getReasonPhrase());
 		if(this.requestBody != null) {

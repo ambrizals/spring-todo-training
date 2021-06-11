@@ -12,7 +12,6 @@ public class AuthInterceptors implements HandlerInterceptor {
 		HttpServletResponse response,
 		Object handler
 	) {
-		// TODO: Create some rule to check URI and URI Method to execute some method
 		System.out.println(request.getHeader("Host"));
 		System.out.println(request.getRequestURI());
 		System.out.println(request.getMethod());
