@@ -66,6 +66,15 @@ public class User {
 	@Column(nullable = false)
 	private String fullname;
 
+	public User () {}
+
+	public User (Long id, String username, String fullname, String password) {
+		this.id = id;
+		this.username = username;
+		this.fullname = fullname;
+		this.password = password;
+	}
+
 	public long getId() {
 		return id;
 	}

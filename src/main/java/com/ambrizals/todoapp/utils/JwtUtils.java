@@ -9,6 +9,7 @@ import com.ambrizals.todoapp.entities.User;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -67,6 +68,20 @@ public class JwtUtils {
 		return claimsResolver.apply(claims);
 	}
 
+	/**
+	 * Extract user data
+	 * 
+	 * 
+	 * @return Claims
+	 */
+	public Claims extractUserData() {
+		String token = (String) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+		Claims claims = extractAllClaims(token);
+		claims.remove("sub");
+		claims.remove("iat");
+		return claims;
+	}
+
 	public String extractUser(String token) {
 		String username = extractClaim(token, Claims::getSubject);
 		return username;
@@ -82,6 +97,7 @@ public class JwtUtils {
 	
 	public String generateToken(User user) {
 		Map<String, Object> claims = new HashMap<String, Object>();
+		claims.put("id", user.getId());
 		claims.put("username", user.getUsername());
 		claims.put("fullname", user.getFullname());
 

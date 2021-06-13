@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
   
@@ -38,7 +39,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       jwt = authorizationHeader.substring(7);
       user = jwtUtils.extractUser(jwt);
     }
-
     if(user != null && SecurityContextHolder.getContext().getAuthentication() == null) {
       if(jwtUtils.validateToken(jwt)) {
         // Hard code please rewrote this code
