@@ -43,7 +43,6 @@ public class UserController extends MainController {
       return this.messageResponse(HttpStatus.ACCEPTED, "User berhasil di tambah !");
   }
 
-  @Secured({"TAMU"})
   @PostMapping(value = "create")  
   public ResponseEntity<Object> createToken(@RequestBody @Valid CreateTokenAuthDTO request) {
     User user = repository.findByUsername(request.getUsername());

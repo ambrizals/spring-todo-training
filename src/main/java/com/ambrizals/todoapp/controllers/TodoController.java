@@ -9,6 +9,7 @@ import com.ambrizals.todoapp.repositories.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,6 +31,7 @@ public class TodoController extends MainController {
     return this.objectResponse(HttpStatus.OK, tasks);
   }
 
+  @Secured({"ROLE_USER"})
   @PostMapping(value = "")
   public ResponseEntity<Object> storeTask(@RequestBody Task request) {
 	  this.sendRequestBody(request);
@@ -37,6 +39,7 @@ public class TodoController extends MainController {
 	  return this.messageResponse(HttpStatus.ACCEPTED, "Berhasil Ditambah !");
   }
 
+  @Secured({"ROLE_USER"})
   @GetMapping(value = "{id}")
   public ResponseEntity<Object> detailTask(@PathVariable("id") long id) {
     Optional<Task> task = repository.findById(id);
@@ -47,6 +50,7 @@ public class TodoController extends MainController {
     }
   }
 
+  @Secured({"ROLE_USER"})
   @PutMapping(value = "{id}/finish")
   public ResponseEntity<Object> updateTask(@PathVariable("id") long id)  {
     Optional<Task> task = repository.findById(id);

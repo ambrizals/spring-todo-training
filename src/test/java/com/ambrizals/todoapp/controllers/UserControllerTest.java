@@ -4,17 +4,18 @@ import com.ambrizals.todoapp.DTO.auth.CreateTokenAuthDTO;
 import com.ambrizals.todoapp.entities.User;
 import com.ambrizals.todoapp.repositories.UserRepository;
 import com.ambrizals.todoapp.utils.HashUtils;
+import com.ambrizals.todoapp.utils.JwtUtils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -29,6 +30,10 @@ import java.util.List;
 @SpringBootTest
 public class UserControllerTest {  
   public MockMvc mockMvc;
+  public String token;
+
+  @Autowired
+  private JwtUtils jwtUtils;
 
   @Autowired
   private WebApplicationContext wac;
@@ -36,14 +41,14 @@ public class UserControllerTest {
   @MockBean
   public UserRepository repository;
 
-//  @Autowired
-//  public UserController controller;
-
   @BeforeEach
   public void setUp() {
     mockMvc = MockMvcBuilders.webAppContextSetup(wac)
       .apply(springSecurity())
       .build();
+    token = jwtUtils.generateToken(new User(
+      1L, "user", "user", HashUtils.generateHash("password")
+    ));
   }
 
   public String userTestPassword = "siapsiapgas";
@@ -72,7 +77,7 @@ public class UserControllerTest {
     User data = singleData();
     CreateTokenAuthDTO dto = new CreateTokenAuthDTO();
     dto.setUsername(data.getUsername());
-    dto.setPassword(data.getPassword());
+    dto.setPassword(userTestPassword);
 
     when(
       repository.findByUsername(anyString())
@@ -84,7 +89,15 @@ public class UserControllerTest {
       .contentType(MediaType.APPLICATION_JSON)
       .content(dto.toJSON())
     )
-    	.andDo(MockMvcResultHandlers.print())
       .andExpect(status().is(HttpStatus.ACCEPTED.value()));
+  }
+
+  @Test
+  public void testAuthUser() throws Exception {
+    mockMvc.perform(
+      get("/v1/auth")
+        .contentType(MediaType.APPLICATION_JSON)
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+    ).andExpect(status().is(HttpStatus.OK.value()));
   }
 }

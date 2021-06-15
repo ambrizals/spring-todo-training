@@ -1,22 +1,26 @@
 package com.ambrizals.todoapp.controllers;
 
 import com.ambrizals.todoapp.entities.Task;
+import com.ambrizals.todoapp.entities.User;
 import com.ambrizals.todoapp.repositories.TaskRepository;
+import com.ambrizals.todoapp.utils.HashUtils;
+import com.ambrizals.todoapp.utils.JwtUtils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,20 +28,28 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
 public class TodoControllerTest {
   public MockMvc mockMvc;
+  public String token;
 
   @MockBean
   public TaskRepository repository;
 
   @Autowired
-  public TodoController controller;
+  private JwtUtils jwtUtils;
+
+  @Autowired
+  private WebApplicationContext wac;
 
   @BeforeEach
   public void setUp() {
-    mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+    mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+      .apply(springSecurity())
+      .build();
+    token = jwtUtils.generateToken(new User(
+      1L, "useryes", "useryes", HashUtils.generateHash("password")
+    ));
   }
   
   /**
@@ -88,6 +100,7 @@ public class TodoControllerTest {
     // Check a result
     mockMvc.perform(
       post("/v1/tasks")
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
         .contentType(MediaType.APPLICATION_JSON)
         .content(simulatedStore.toJSON().toString())
     )
@@ -102,7 +115,11 @@ public class TodoControllerTest {
       .thenReturn(singleData());
 
     // Check result from controller
-    mockMvc.perform(get("/v1/tasks/1"))
+    mockMvc.perform(
+      get("/v1/tasks/1")
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+      )
       .andExpect(status().is(HttpStatus.OK.value()))
       .andReturn();
   }
@@ -110,7 +127,11 @@ public class TodoControllerTest {
   @Test
   public void testDetailWhenNotFound() throws Exception {
     // Check result from controller
-    mockMvc.perform(get("/v1/tasks/1"))
+    mockMvc.perform(
+      get("/v1/tasks/1")
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+    )
       .andExpect(status().is(HttpStatus.NOT_FOUND.value()))
       .andReturn();
   }  
@@ -122,7 +143,11 @@ public class TodoControllerTest {
       .thenReturn(singleData());
 
     // Check result from controller
-    mockMvc.perform(put("/v1/tasks/1/finish"))
+    mockMvc.perform(
+      put("/v1/tasks/1/finish")
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+    )
       .andExpect(status().is(HttpStatus.OK.value()))
       .andReturn();
   }
@@ -130,7 +155,11 @@ public class TodoControllerTest {
   @Test
   public void notUpdateTaskWhenNotFound() throws Exception {
     // Check result from controller
-    mockMvc.perform(put("/v1/tasks/1/finish"))
+    mockMvc.perform(
+      put("/v1/tasks/1/finish")
+        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+        .contentType(MediaType.APPLICATION_JSON)
+    )
       .andExpect(status().is(HttpStatus.NOT_FOUND.value()	))
       .andReturn();
   }
